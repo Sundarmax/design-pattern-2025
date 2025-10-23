@@ -1,4 +1,6 @@
 import threading
+from multiprocessing.managers import rebuild_as_list
+
 
 class LazySingleton:
     _instance = None
@@ -29,11 +31,32 @@ class ThreadSafeSingleton:
                 ThreadSafeSingleton._instance = ThreadSafeSingleton()
             return ThreadSafeSingleton._instance
 
-class EagerSingleton:
-    '''
-    It is one of the simplest and inheritly thread-safe without needing explicit synchronization.
+class DoubleCheckedSingleton:
+    """
+    Minimize the performance overhead from synchronization by only synchronizing
+    when the object is first created.
+    """
+    _instance = None
+    _lock = threading.Lock()
 
-    '''
+    def __init__(self):
+        if DoubleCheckedSingleton._instance is not None:
+            raise  Exception("use get_instance() method")
+    @staticmethod
+
+    def get_instance():
+        if DoubleCheckedSingleton._instance is None:
+            with DoubleCheckedSingleton._lock:
+                if DoubleCheckedSingleton._instance is None:
+                    DoubleCheckedSingleton._instance = DoubleCheckedSingleton()
+        return DoubleCheckedSingleton._instance
+
+
+
+class EagerSingleton:
+    """
+    It is one of the simplest and inheritly thread-safe without needing explicit synchronization.
+    """
     _instance = None
 
     def __init__(self):
